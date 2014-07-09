@@ -6,12 +6,12 @@ This simple service broker is meant to demonstrate how to create a service broke
 
 ##Setting up
 
-This is a spring-boot application and it follows many of its principles.
+This is a [spring-boot](http://projects.spring.io/spring-boot/) application and it follows many of its principles.
 
 The broker needs two connections to your oracle database. One needs to be a SYSDBA type of user, that can create tablespaces, users, profiles. The
 other connection is just a regular user that can create tables to store the metadata of the broker (plans, instances, bindings)
 
-The config file is located at *src/main/resources/config/application.properties*
+The config file is located at `src/main/resources/config/application.properties`
 
 ```
 oracle.host=localhost
@@ -39,4 +39,9 @@ dba.datasource.initial-size=1
 
 ```
 
-Change the connection information for your database here.
+When the application starts it will create the first ServiceDefinition based on a template found at `src/main/resources/ServiceDescription.json`, you can 
+adjust to your preferences there.
+
+## Extensions to CF Service Broker API
+
+Besides the endpoints defined on [Service Broker API](http://docs.cloudfoundry.org/services/api.html)
