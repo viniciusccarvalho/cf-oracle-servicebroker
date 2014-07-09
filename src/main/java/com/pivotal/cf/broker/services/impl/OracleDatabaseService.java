@@ -31,15 +31,18 @@ public class OracleDatabaseService implements DatabaseService {
 	
 	final Logger logger = LoggerFactory.getLogger(OracleDatabaseService.class);
 	
-	final String CREATE_PROFILE = "CREATE USER_PROFILE";
+	final String CREATE_PROFILE = "CREATE PROFILE %s LIMIT SESSIONS_PER_USER %s";
+	final String DROP_PROFILE = "DROP PROFILE %s";
 	
-	final String CREATE_USER = "CREATE USER %s IDENTIFIED BY %s DEFAULT TABLESPACE %s TEMPORARY TABLESPACE %s";
+	final String CREATE_USER = "CREATE USER %s IDENTIFIED BY %s DEFAULT TABLESPACE %s TEMPORARY TABLESPACE %s PROFILE %s";
 	final String DROP_USER = "DROP USER %s";
 	final String GRANT = "grant CREATE SESSION, ALTER SESSION, CREATE DATABASE LINK, CREATE MATERIALIZED VIEW, CREATE PROCEDURE, CREATE PUBLIC SYNONYM, CREATE ROLE, CREATE SEQUENCE, CREATE SYNONYM, CREATE TABLE, CREATE TRIGGER, CREATE TYPE, CREATE VIEW, UNLIMITED TABLESPACE to %s";
 	final String CREATE_TABLESPACE = "create tablespace %s datafile '%s' size 10M autoextend on maxsize %s extent management local uniform size 64K";
 	final String DROP_TABLESPACE =" DROP TABLESPACE %s INCLUDING CONTENTS AND DATAFILES";
 	
 	final String CREATE_TEMP_TABLESPACE = "create temporary tablespace %s tempfile '%s' size 10M autoextend on next 32m maxsize %s extent management local";
+	
+	final String BROKER_PREFIX ="oracle_broker_";
 	
 	@Autowired
 	public OracleDatabaseService(@Qualifier("adminDs") DataSource adminDs) {
@@ -48,7 +51,14 @@ public class OracleDatabaseService implements DatabaseService {
 	
 	@Override
 	public boolean createProfile(Plan plan) {
-		//template.execute(String.format(CREATE_PROFILE,plan.getId(), plan.getMetadata().get("max_connections")));
+		template.execute(String.format(CREATE_PROFILE,BROKER_PREFIX+plan.getName(), plan.getMetadata().getOther().get("connections")));
+		return true;
+	}
+
+	@Override
+	public boolean deleteProfile(Plan plan) {
+		String command = String.format(DROP_PROFILE, BROKER_PREFIX+plan.getName());
+		template.execute(command);
 		return true;
 	}
 
@@ -69,8 +79,9 @@ public class OracleDatabaseService implements DatabaseService {
 	@Override
 	public boolean createUser(ServiceInstanceBinding binding) {
 		ServiceInstance instance = serviceInstanceRepository.findOne(binding.getServiceInstanceId());
+		Plan plan = planRepository.findOne(instance.getPlanId());
 		String tablespace = instance.getConfig().get("tablespace");
-		String command = String.format(CREATE_USER, binding.getCredentials().get("username"), binding.getCredentials().get("password"),tablespace,tablespace+"_temp");
+		String command = String.format(CREATE_USER, binding.getCredentials().get("username"), binding.getCredentials().get("password"),tablespace,tablespace+"_temp",BROKER_PREFIX+plan.getName());
 		String grantCommand = String.format(GRANT, binding.getCredentials().get("username"));
 		logger.debug(command);
 		logger.debug(grantCommand);
@@ -99,5 +110,6 @@ public class OracleDatabaseService implements DatabaseService {
 		template.execute(command);
 		return true;
 	}
+
 
 }

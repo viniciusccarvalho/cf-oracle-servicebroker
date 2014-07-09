@@ -46,6 +46,19 @@ public class CatalogServiceImpl extends BaseService implements CatalogService{
 		return makeCollection(serviceRepository.findAll());
 	}
 
+	@Override
+	public boolean deleteServiceDefinition(String serviceDefinitionId) {
+		if(!serviceRepository.exists(serviceDefinitionId)){
+			return false;
+		}
+		ServiceDefinition serviceDefinition = serviceRepository.findOne(serviceDefinitionId);
+		if(planRepository.countByServiceDefinition(serviceDefinition) > 0){
+			throw new IllegalStateException("Can not remove service instance, the instance has plans associated to it");
+		}
+		serviceRepository.delete(serviceDefinitionId);
+		return true;
+	}
+
 	
 	
 	

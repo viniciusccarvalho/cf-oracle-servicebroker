@@ -21,12 +21,15 @@ public class PlanServiceImpl implements PlanService {
 	@Autowired
 	private ServiceDefinitionRepository serviceRepository;
 	
+	@Autowired
+	private ServiceInstanceRepository instanceRepository;
+	
 	
 	@Autowired
 	private DatabaseService dbService;
 	
 	@Override
-	public Plan createPlan(Plan plan) {
+	public Plan create(Plan plan) {
 		ServiceDefinition serviceDefinition = serviceRepository.findOne(plan.getServiceDefinition().getId());
 		if(serviceDefinition == null){
 			throw new IllegalArgumentException("No such service definition : " + plan.getServiceDefinition().getId());
@@ -35,6 +38,21 @@ public class PlanServiceImpl implements PlanService {
 		plan.setServiceDefinition(serviceDefinition);
 		plan.getMetadata().setId(plan.getId());
 		return planRepository.save(plan);
+	}
+
+	@Override
+	public boolean delete(String planId) {
+		Plan plan = planRepository.findOne(planId);
+		if(plan == null){
+			return false;
+		}
+		if(instanceRepository.countByPlanId(planId) > 0){
+			throw new IllegalStateException("Can not remove plan, it's being used by service instances");
+		}
+		
+		dbService.deleteProfile(plan);
+		planRepository.delete(plan);
+		return true;
 	}
 
 }

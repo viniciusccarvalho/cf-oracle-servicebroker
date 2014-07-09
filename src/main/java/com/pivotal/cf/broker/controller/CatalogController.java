@@ -41,6 +41,15 @@ public class CatalogController {
 	}
 	
 	@ResponseBody
+	@RequestMapping(produces="application/json", value="/services/{sid}", method=RequestMethod.DELETE)
+	public ResponseEntity<String> deleteServiceDefinition(@PathVariable("sid") String serviceInstanceId){
+		boolean deleted = service.deleteServiceDefinition(serviceInstanceId);
+		HttpStatus status = deleted ? HttpStatus.OK : HttpStatus.GONE;
+		ResponseEntity<String> response = new ResponseEntity<>("{}",status);  
+		return response;
+	}
+	
+	@ResponseBody
 	@RequestMapping(produces="application/json", method=RequestMethod.GET)
 	public Catalog list(){
 		List<ServiceDefinition> services = service.listServices();

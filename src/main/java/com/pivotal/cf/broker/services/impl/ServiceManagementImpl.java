@@ -69,6 +69,9 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 		if(!serviceInstanceRepository.exists(serviceInstanceId)){
 			return false;
 		}
+		if(bindingRepository.countByServiceInstanceId(serviceInstanceId) > 0){
+			throw new IllegalStateException("Can not delete service instance, there are still apps bound to it");
+		}
 		dbService.deleteTableSpaces(serviceInstanceId);
 		serviceInstanceRepository.delete(serviceInstanceId);
 		return true;
@@ -81,7 +84,6 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 
 	@Override
 	public ServiceInstanceBinding createInstanceBinding(ServiceInstanceBindingRequest bindingRequest) {
-		//TODO create users, user profile identified by plan, use tablespace identified by serviceInstance
 		if(bindingRepository.exists(bindingRequest.getBindingId())){
 			throw new IllegalStateException("Binding Already exists");
 		}

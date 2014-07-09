@@ -8,6 +8,7 @@ import com.pivotal.cf.broker.model.ServiceInstanceBinding;
 
 public interface DatabaseService {
 	public boolean createProfile(Plan plan);
+	public boolean deleteProfile(Plan plan);
 	public boolean createTableSpaces(ServiceInstance instance);
 	public boolean deleteTableSpaces(String serviceInstanceId);
 	

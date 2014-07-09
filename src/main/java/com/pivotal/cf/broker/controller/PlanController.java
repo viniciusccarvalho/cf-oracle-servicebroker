@@ -32,8 +32,16 @@ public class PlanController {
 	public ResponseEntity<Plan> createPlan(@RequestBody Plan plan, @PathVariable("sid") String sid){
 		ServiceDefinition serviceDefinition = new ServiceDefinition(sid);
 		plan.setServiceDefinition(serviceDefinition);
-		Plan persistedPlan = service.createPlan(plan);
+		Plan persistedPlan = service.create(plan);
 		ResponseEntity<Plan> response= new ResponseEntity<>(persistedPlan, HttpStatus.CREATED);
+		return response;
+	}
+	
+	@RequestMapping(consumes="application/json", produces="application/json", method=RequestMethod.DELETE)
+	public ResponseEntity<String> deletePlan(@PathVariable("sid") String sid, @PathVariable("planId") String planId){
+		boolean deleted = service.delete(planId);
+		HttpStatus status = deleted ? HttpStatus.OK : HttpStatus.GONE;
+		ResponseEntity<String> response = new ResponseEntity<>("{}",status);  
 		return response;
 	}
 	

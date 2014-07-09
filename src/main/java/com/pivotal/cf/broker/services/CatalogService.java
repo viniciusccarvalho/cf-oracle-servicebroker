@@ -11,6 +11,7 @@ import com.pivotal.cf.broker.model.ServiceInstance;
 public interface CatalogService {
 
 	public ServiceDefinition createServiceDefinition(ServiceDefinition serviceDefinition);
+	public boolean deleteServiceDefinition(String serviceDefinitionId);
 	
 	public List<ServiceDefinition> listServices();
 	

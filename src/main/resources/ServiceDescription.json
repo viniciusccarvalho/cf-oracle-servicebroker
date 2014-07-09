@@ -5,6 +5,6 @@
 "tags" : ["oracle","relational"],
 "metadata" : {
 "longDescription" : "Experimental Oracle XE Service. New services create new tablespaces, Plans defines tablespaces and session quotas. Bindings create users",
-"imageUrl" : "http://www.microtech-solution.com/ph/images/products/customEnterpriseApplication/technology/oracle_icon.jpg"
+"imageUrl" : "https://raw.githubusercontent.com/viniciusccarvalho/cf-oracle-servicebroker/master/src/main/resources/static/images/oracle_icon.jpg"
 }
 }
