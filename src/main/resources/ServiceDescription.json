@@ -1,0 +1,10 @@
+{
+"name" : "Oracle XE",
+"description" : "Oracle Express Database Service",
+"bindable" : true,
+"tags" : ["oracle","relational"],
+"metadata" : {
+"longDescription" : "Experimental Oracle XE Service. New services create new tablespaces, Plans defines tablespaces and session quotas. Bindings create users",
+"imageUrl" : "http://www.microtech-solution.com/ph/images/products/customEnterpriseApplication/technology/oracle_icon.jpg"
+}
+}
