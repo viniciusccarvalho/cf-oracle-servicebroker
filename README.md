@@ -136,7 +136,7 @@ extent management local
 At last when you bind an instance, the broker provides the plan, instance and binding objects to your template:
 
 The binding.credentials will contain a random username/password that the service creates.
-
+```
 CREATE USER ${binding.credentials.username} IDENTIFIED BY ${binding.credentials.password}
 DEFAULT TABLESPACE ${instance.config.tablespace} 
 TEMPORARY TABLESPACE ${instance.config.tablespace}_temp
@@ -147,7 +147,7 @@ grant CREATE SESSION, ALTER SESSION, CREATE DATABASE LINK,
       CREATE ROLE, CREATE SEQUENCE, CREATE SYNONYM, CREATE TABLE, 
       CREATE TRIGGER, CREATE TYPE, CREATE VIEW, UNLIMITED TABLESPACE 
       to ${binding.credentials.username}
-
+```
 ## Installing
 
 You will need to download the oc4j jar and install manually, its configured on build.gradle as version 12.6.6.6 (obvious reasons). Just install the dependency
