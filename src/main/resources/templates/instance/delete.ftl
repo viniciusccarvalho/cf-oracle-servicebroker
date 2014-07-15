@@ -1,0 +1,3 @@
+DROP TABLESPACE ${instance.config.tablespace} INCLUDING CONTENTS AND DATAFILES;
+
+DROP TABLESPACE ${instance.config.tablespace}_temp INCLUDING CONTENTS AND DATAFILES

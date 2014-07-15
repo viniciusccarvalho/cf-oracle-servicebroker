@@ -37,7 +37,7 @@ public class PlanController {
 		return response;
 	}
 	
-	@RequestMapping(consumes="application/json", produces="application/json", method=RequestMethod.DELETE)
+	@RequestMapping(value="/{planId}",produces="application/json", method=RequestMethod.DELETE)
 	public ResponseEntity<String> deletePlan(@PathVariable("sid") String sid, @PathVariable("planId") String planId){
 		boolean deleted = service.delete(planId);
 		HttpStatus status = deleted ? HttpStatus.OK : HttpStatus.GONE;

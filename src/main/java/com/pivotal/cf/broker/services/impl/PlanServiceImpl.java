@@ -1,5 +1,8 @@
 package com.pivotal.cf.broker.services.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +14,9 @@ import com.pivotal.cf.broker.repositories.ServiceDefinitionRepository;
 import com.pivotal.cf.broker.repositories.ServiceInstanceRepository;
 import com.pivotal.cf.broker.services.DatabaseService;
 import com.pivotal.cf.broker.services.PlanService;
+import com.pivotal.cf.broker.services.TemplateService;
+
+import freemarker.template.Configuration;
 
 @Service
 public class PlanServiceImpl implements PlanService {
@@ -24,9 +30,10 @@ public class PlanServiceImpl implements PlanService {
 	@Autowired
 	private ServiceInstanceRepository instanceRepository;
 	
-	
 	@Autowired
-	private DatabaseService dbService;
+	private TemplateService templateService;
+	
+	
 	
 	@Override
 	public Plan create(Plan plan) {
@@ -34,9 +41,11 @@ public class PlanServiceImpl implements PlanService {
 		if(serviceDefinition == null){
 			throw new IllegalArgumentException("No such service definition : " + plan.getServiceDefinition().getId());
 		}
-		dbService.createProfile(plan);
+		Map<String,Object> model = new HashMap<String, Object>();
 		plan.setServiceDefinition(serviceDefinition);
 		plan.getMetadata().setId(plan.getId());
+		model.put("plan",plan);
+		templateService.execute("plan/create.ftl", model);
 		return planRepository.save(plan);
 	}
 
@@ -49,8 +58,9 @@ public class PlanServiceImpl implements PlanService {
 		if(instanceRepository.countByPlanId(planId) > 0){
 			throw new IllegalStateException("Can not remove plan, it's being used by service instances");
 		}
-		
-		dbService.deleteProfile(plan);
+		Map<String,Object> model = new HashMap<String, Object>();
+		model.put("plan",plan);
+		templateService.execute("plan/delete.ftl", model);
 		planRepository.delete(plan);
 		return true;
 	}

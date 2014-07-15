@@ -23,6 +23,7 @@ import com.pivotal.cf.broker.repositories.ServiceInstanceRepository;
 import com.pivotal.cf.broker.services.BaseService;
 import com.pivotal.cf.broker.services.DatabaseService;
 import com.pivotal.cf.broker.services.ServiceManagement;
+import com.pivotal.cf.broker.services.TemplateService;
 import com.pivotal.cf.broker.utils.StringUtils;
 
 @Service
@@ -40,7 +41,7 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 	private ServiceInstanceBindingRepository bindingRepository;
 	
 	@Autowired
-	private DatabaseService dbService;
+	TemplateService templateService;
 	
 	@Autowired
 	private Environment env;
@@ -59,7 +60,12 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 			throw new IllegalStateException("There's already an instance of this service");
 		}
 		ServiceInstance instance = new ServiceInstance(serviceRequest.getServiceInstanceId(), serviceDefinition.getId(), plan.getId(), serviceRequest.getOrganizationGuid(), serviceRequest.getSpaceGuid(), "");
-		dbService.createTableSpaces(instance);
+		String tablespaceName = StringUtils.randomString(12);
+		instance.getConfig().put("tablespace",tablespaceName);
+		Map<String,Object> model = new HashMap<>();
+		model.put("plan",plan);
+		model.put("instance",instance);
+		templateService.execute("instance/create.ftl", model);
 		instance = serviceInstanceRepository.save(instance);
 		return instance;
 	}
@@ -72,7 +78,11 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 		if(bindingRepository.countByServiceInstanceId(serviceInstanceId) > 0){
 			throw new IllegalStateException("Can not delete service instance, there are still apps bound to it");
 		}
-		dbService.deleteTableSpaces(serviceInstanceId);
+		ServiceInstance instance = serviceInstanceRepository.findOne(serviceInstanceId);
+		Map<String,Object> model = new HashMap<>();
+		model.put("instance",instance);
+		templateService.execute("instance/delete.ftl", model);
+		
 		serviceInstanceRepository.delete(serviceInstanceId);
 		return true;
 	}
@@ -100,7 +110,13 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 		binding.setServiceInstanceId(bindingRequest.getInstanceId());
 		binding.setAppGuid(bindingRequest.getAppGuid());
 		binding.setCredentials(credentials);
-		dbService.createUser(binding);
+		ServiceInstance instance = serviceInstanceRepository.findOne(bindingRequest.getInstanceId());
+		Plan plan = planRepository.findOne(bindingRequest.getPlanId());
+		Map<String,Object> model = new HashMap<>();
+		model.put("plan",plan);
+		model.put("binding",binding);
+		model.put("instance",instance);
+		templateService.execute("binding/create.ftl", model);
 		binding = bindingRepository.save(binding);
 		return binding;
 	}
@@ -111,7 +127,9 @@ public class ServiceManagementImpl extends BaseService implements ServiceManagem
 		if(binding == null){
 			return false;
 		}
-		dbService.deleteUser(binding);
+		Map<String,Object> model = new HashMap<>();
+		model.put("binding",binding);
+		templateService.execute("binding/delete.ftl", model);
 		bindingRepository.delete(binding);
 		return true;
 	}

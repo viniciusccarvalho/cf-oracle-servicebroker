@@ -1,0 +1,1 @@
+CREATE PROFILE plan_${plan.name} LIMIT SESSIONS_PER_USER ${plan.metadata.other.connections}

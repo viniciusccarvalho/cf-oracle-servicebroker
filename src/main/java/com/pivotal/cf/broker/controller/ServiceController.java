@@ -36,7 +36,7 @@ public class ServiceController {
 		return response;
 	}
 	
-	@RequestMapping(consumes="application/json", produces="application/json", value="/{instanceId}", method=RequestMethod.DELETE)
+	@RequestMapping(produces="application/json", value="/{instanceId}", method=RequestMethod.DELETE)
 	public ResponseEntity<String> deprovision(@PathVariable("instanceId") String serviceInstanceId) {
 		boolean deleted = service.removeServiceInstance(serviceInstanceId);
 		HttpStatus status = deleted ? HttpStatus.OK : HttpStatus.GONE;
@@ -52,7 +52,7 @@ public class ServiceController {
 	}
 	
 	@ResponseBody
-	@RequestMapping(value="{instanceId}/service_bindings/{bindingId}",consumes="application/json", produces="application/json", method=RequestMethod.PUT)
+	@RequestMapping(value="/{instanceId}/service_bindings/{bindingId}",consumes="application/json", produces="application/json", method=RequestMethod.PUT)
 	public ResponseEntity<ServiceInstanceBindingResponse> bind(@RequestBody ServiceInstanceBindingRequest request, @PathVariable("instanceId") String serviceInstanceId, @PathVariable("bindingId") String bindingId){
 		request.setBindingId(bindingId);
 		request.setInstanceId(serviceInstanceId);
@@ -62,7 +62,7 @@ public class ServiceController {
         		HttpStatus.CREATED);
 	}
 	
-	@RequestMapping(value="{instanceId}/service_bindings/{bindingId}", produces="application/json", method=RequestMethod.DELETE)
+	@RequestMapping(value="/{instanceId}/service_bindings/{bindingId}", produces="application/json", method=RequestMethod.DELETE)
 	public ResponseEntity<String> unbind(@PathVariable("instanceId") String serviceInstanceId, @PathVariable("bindingId") String bindingId){
 		boolean deleted = service.removeBinding(bindingId);
 		HttpStatus status = deleted ? HttpStatus.OK : HttpStatus.GONE;

@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  * The catalog of services offered by this broker.
  * 
  * @author sgreenberg@gopivotal.com
+ * @author vcarvalho@gopivotal.com
  */
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class Catalog {
@@ -22,6 +23,9 @@ public class Catalog {
 	@JsonProperty("services")
 	private List<ServiceDefinition> serviceDefinitions = new ArrayList<ServiceDefinition>();
 	
+	
+	public Catalog(){}
+	
 	public Catalog(List<ServiceDefinition> serviceDefinitions) {
 		this.setServiceDefinitions(serviceDefinitions); 
 	}
@@ -30,7 +34,7 @@ public class Catalog {
 		return serviceDefinitions;
 	}
 
-	private void setServiceDefinitions(List<ServiceDefinition> serviceDefinitions) {
+	public void setServiceDefinitions(List<ServiceDefinition> serviceDefinitions) {
 		if ( serviceDefinitions == null ) {
 			// ensure serialization as an empty array, not null
 			this.serviceDefinitions = new ArrayList<ServiceDefinition>();

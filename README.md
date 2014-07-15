@@ -73,35 +73,80 @@ The payload is the same as the one found on the [Service Broker API](http://docs
 
 ##How does it work
 
-The broker controls resources on Oracle. Much like the mysql broker, the broker can control two resources: table sizes and number of connections. It does that by
-controlling PROFILES and TABLESPACES on Oracle.
+The broker controls resources on Oracle. Much like the mysql broker. The broker uses a template system to define what to create inside oracle for each operation.
 
-It uses metadata from the plan definition to do so. There's two fields that you can use to control resources:
+Templates are located under /src/resources/templates. There's 3 templates directories (plan,instance,binding) each represents one action that the broker support.
+
+Inside those folders templates are named (create.ftl -> POST/PUT of resource, delete.ftl -> DELETE of resource)
+
+You can customize the behavior of the broker by changing those templates, without having to touch the broker code.
+
+ 
+
+### Creating a plan
+
+When you create a plan, the broker will bind the template with the plan JSON object that you used to create the plan. For example:
 
 ```
+
 {
 "name" : "dev",
 "description" : "development plan",
 "metadata" : {
-    "max_size" : "250M",
-    "connections" : 5,
-    "bullets" : ["250 megabytes of space","5 simultaneous connections"]
-    }
+"max_size" : "250M",
+"connections" : 5,
+"bullets" : ["250 megabytes of space","5 simultaneous connections"]
 }
+}
+
 ```
-You can define (for now) max_size and connections.
 
-### Creating a plan
+```
 
-When you create a new plan, a new PROFILE is created on Oracle defining the max_number_sessions, it uses the `connections` parameter to do so.
+CREATE PROFILE plan_${plan.name} LIMIT SESSIONS_PER_USER ${plan.metadata.other.connections}
+
+```
+
+As you can see, creating a plan creates a new oracle profile, you can use any metadata.other attribute to pass to your SQL definition.
 
 ### Creating an instance
 
-When a new instance is created, a new TABLESPACE and a TEMPORARY TABLESPACE is created using the max_size parameter.
+When you create an instance the broker will provide both the full plan JSON object plus an instance object. The instance object has a metadata named
+tablespace which is a random string that can be used to create the tablespace for the instance
+
+```
+create tablespace ${instance.config.tablespace} 
+datafile '${instance.config.tablespace}.dat' 
+size 10M 
+autoextend on 
+maxsize ${plan.metadata.other.max_size} 
+extent management local 
+uniform size 64K;
+
+create temporary tablespace ${instance.config.tablespace}_temp 
+tempfile '${instance.config.tablespace}_temp.dat'
+size 10M 
+autoextend on next 32m 
+maxsize ${plan.metadata.other.max_size}
+extent management local
+```
 
 ### Binding an instance
 
-Finally when you bind the service, a new USER is created using the PROFILE defined by the plan, and using the TABLESPACE created by the instance.
+At last when you bind an instance, the broker provides the plan, instance and binding objects to your template:
+
+The binding.credentials will contain a random username/password that the service creates.
+
+CREATE USER ${binding.credentials.username} IDENTIFIED BY ${binding.credentials.password}
+DEFAULT TABLESPACE ${instance.config.tablespace} 
+TEMPORARY TABLESPACE ${instance.config.tablespace}_temp
+PROFILE plan_${plan.name};
+
+grant CREATE SESSION, ALTER SESSION, CREATE DATABASE LINK,
+      CREATE MATERIALIZED VIEW, CREATE PROCEDURE, CREATE PUBLIC SYNONYM,
+      CREATE ROLE, CREATE SEQUENCE, CREATE SYNONYM, CREATE TABLE, 
+      CREATE TRIGGER, CREATE TYPE, CREATE VIEW, UNLIMITED TABLESPACE 
+      to ${binding.credentials.username}
 
 ## Installing
 
