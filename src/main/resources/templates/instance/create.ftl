@@ -1,6 +1,6 @@
 create tablespace ${instance.config.tablespace} 
 datafile '${instance.config.tablespace}.dat' 
-size 10M 
+size ${plan.metadata.other.init_size}
 autoextend on 
 maxsize ${plan.metadata.other.max_size} 
 extent management local 

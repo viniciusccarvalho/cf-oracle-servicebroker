@@ -34,6 +34,7 @@ public class TemplateTest {
 		PlanMetadata metadata = new PlanMetadata();
 		plan.setMetadata(metadata);
 		metadata.getOther().put("connections", "5");
+		metadata.getOther().put("init_size","20M");
 		metadata.getOther().put("max_size", "500M");
 		
 		this.instance = new ServiceInstance("123", "1234", "12345", "123456", "1234567", "");

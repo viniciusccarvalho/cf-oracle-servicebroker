@@ -37,7 +37,9 @@ public class OracleDatabaseService implements DatabaseService {
 	final String CREATE_USER = "CREATE USER %s IDENTIFIED BY %s DEFAULT TABLESPACE %s TEMPORARY TABLESPACE %s PROFILE %s";
 	final String DROP_USER = "DROP USER %s";
 	final String GRANT = "grant CREATE SESSION, ALTER SESSION, CREATE DATABASE LINK, CREATE MATERIALIZED VIEW, CREATE PROCEDURE, CREATE PUBLIC SYNONYM, CREATE ROLE, CREATE SEQUENCE, CREATE SYNONYM, CREATE TABLE, CREATE TRIGGER, CREATE TYPE, CREATE VIEW, UNLIMITED TABLESPACE to %s";
-	final String CREATE_TABLESPACE = "create tablespace %s datafile '%s' size 10M autoextend on maxsize %s extent management local uniform size 64K";
+
+	// Make initial size for tablespace configurable
+	final String CREATE_TABLESPACE = "create tablespace %s datafile '%s' size %s autoextend on maxsize %s extent management local uniform size 64K";
 	final String DROP_TABLESPACE =" DROP TABLESPACE %s INCLUDING CONTENTS AND DATAFILES";
 	
 	final String CREATE_TEMP_TABLESPACE = "create temporary tablespace %s tempfile '%s' size 10M autoextend on next 32m maxsize %s extent management local";
@@ -67,7 +69,15 @@ public class OracleDatabaseService implements DatabaseService {
 		Plan plan = planRepository.findOne(instance.getPlanId());
 		String tablespaceName = StringUtils.randomString(12);
 		instance.getConfig().put("tablespace",tablespaceName);
-		String command = String.format(CREATE_TABLESPACE, tablespaceName, tablespaceName+".dat",plan.getMetadata().getOther().get("max_size"));
+
+        // Adding init_size for tablespace
+        String init_size = plan.getMetadata().getOther().get("init_size");
+        if (init_size == null)
+          init_size = "64M";
+        instance.getConfig().put("init_size",init_size);
+
+		instance.getConfig().put("tablespace",tablespaceName);
+		String command = String.format(CREATE_TABLESPACE, tablespaceName, tablespaceName+".dat",init_size, plan.getMetadata().getOther().get("max_size"));
 		String tempCommand = String.format(CREATE_TEMP_TABLESPACE,tablespaceName+"_temp",tablespaceName+"_temp.dat",plan.getMetadata().getOther().get("max_size"));
 		logger.debug(command);
 		logger.debug(tempCommand);

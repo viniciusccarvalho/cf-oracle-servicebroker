@@ -93,6 +93,7 @@ When you create a plan, the broker will bind the template with the plan JSON obj
 "name" : "dev",
 "description" : "development plan",
 "metadata" : {
+"init_size" : "20M",
 "max_size" : "250M",
 "connections" : 5,
 "bullets" : ["250 megabytes of space","5 simultaneous connections"]
@@ -119,6 +120,7 @@ create tablespace ${instance.config.tablespace}
 datafile '${instance.config.tablespace}.dat' 
 size 10M 
 autoextend on 
+size ${plan.metadata.other.init_size} 
 maxsize ${plan.metadata.other.max_size} 
 extent management local 
 uniform size 64K;

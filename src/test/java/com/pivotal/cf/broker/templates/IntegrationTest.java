@@ -33,6 +33,7 @@ public class IntegrationTest {
 		PlanMetadata metadata = new PlanMetadata();
 		metadata.setBullets(Arrays.asList("250 megabytes of space","5 simultaneous connections"));
 		metadata.getOther().put("connections", "5");
+		metadata.getOther().put("init_size","20M");
 		metadata.getOther().put("max_size","250M");
 		plan.setMetadata(metadata);
 		
