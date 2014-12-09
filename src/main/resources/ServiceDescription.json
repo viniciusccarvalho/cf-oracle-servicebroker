@@ -1,5 +1,5 @@
 {
-"name" : "Oracle XE",
+"name" : "Oracle-XE",
 "description" : "Oracle Express Database Service",
 "bindable" : true,
 "tags" : ["oracle","relational"],
